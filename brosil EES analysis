@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Borosil Employee Engagement Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--surface3:#252e42;
+  --border:#2a3348;--border2:#334060;
+  --text:#e8edf5;--text2:#8fa3c0;--text3:#4d6080;
+  --accent:#f59e0b;--accent2:#fbbf24;--accent-dim:#f59e0b22;
+  --blue:#3b82f6;--blue-dim:#3b82f622;
+  --green:#10b981;--green-dim:#10b98122;
+  --red:#ef4444;--red-dim:#ef444422;
+  --purple:#a855f7;--purple-dim:#a855f722;
+  --teal:#06b6d4;--teal-dim:#06b6d422;
+  --pink:#ec4899;--pink-dim:#ec489922;
+  --orange:#f97316;--orange-dim:#f9731622;
+  --lime:#84cc16;--lime-dim:#84cc1622;
+  --sky:#0ea5e9;--sky-dim:#0ea5e922;
+  --violet:#8b5cf6;--violet-dim:#8b5cf622;
+  --rose:#f43f5e;--rose-dim:#f43f5e22;
+  --amber:#d97706;--amber-dim:#d9770622;
+  --emerald:#059669;--emerald-dim:#05966922;
+  --cyan:#22d3ee;--cyan-dim:#22d3ee22;
+  --indigo:#6366f1;--indigo-dim:#6366f122;
+  --r:14px;--r-sm:9px;--r-xs:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-sm:0 2px 8px rgba(0,0,0,.3);
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* HEADER */
+header{
+  background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;height:66px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;backdrop-filter:blur(12px);
+}
+.logo-area{display:flex;align-items:center;gap:14px}
+.logo-pill{background:var(--accent);color:#000;font-family:'Playfair Display',serif;font-size:14px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.5px}
+.hdr-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text)}
+.hdr-sub{font-size:11px;color:var(--text3);margin-top:2px;letter-spacing:.6px;text-transform:uppercase}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.badge{background:var(--surface3);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--text2)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(16,185,129,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+
+/* LAYOUT */
+.wrap{display:flex;min-height:calc(100vh - 66px)}
+.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);padding:18px 12px;flex-shrink:0;overflow-y:auto;position:sticky;top:66px;max-height:calc(100vh - 66px)}
+.sb-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);padding:0 8px;margin:16px 0 6px}
+.sb-label:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:none;color:var(--text2);font-family:inherit;font-size:13px;font-weight:500;border-radius:var(--r-xs);cursor:pointer;text-align:left;transition:all .15s;margin-bottom:2px}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:var(--accent-dim);color:var(--accent);font-weight:600;border:1px solid var(--accent)33}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.filter-label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:4px}
+select{width:100%;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r-xs);background:var(--surface2);color:var(--text);font-family:inherit;font-size:12px;margin-bottom:8px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238fa3c0'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+select:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.btn-reset{width:100%;padding:8px;background:var(--surface3);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r-xs);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .15s;margin-top:2px}
+.btn-reset:hover{background:var(--red-dim);color:var(--red);border-color:var(--red)}
+.filter-count{margin-top:10px;padding:8px 12px;background:var(--accent-dim);border-radius:var(--r-xs);font-size:11px;color:var(--accent);text-align:center;font-weight:700;border:1px solid var(--accent)33}
+
+/* MAIN */
+.main{flex:1;padding:24px;overflow-y:auto;min-width:0}
+.page{display:none}
+.page.active{display:block;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.ph{margin-bottom:24px}
+.ph-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);margin-bottom:6px}
+.ph-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--text);line-height:1.2}
+.ph-sub{font-size:13px;color:var(--text2);margin-top:5px}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.mb{margin-bottom:16px}
+.span2{grid-column:span 2}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm)}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.ct-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* METRIC */
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.metric::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;opacity:.08;transform:translate(20px,-20px)}
+.metric-val{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;line-height:1;margin-bottom:6px}
+.metric-label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.metric-bar{height:3px;border-radius:2px;margin-top:12px;background:var(--surface3)}
+.metric-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+/* SECTION CARDS — main innovation */
+.section-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.sec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.sec-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;border-radius:var(--r)}
+.sec-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.sec-card.active-sec{border-color:var(--c, #f59e0b);box-shadow:0 0 0 1px var(--c, #f59e0b)33}
+.sec-card.active-sec::before{opacity:.04;background:var(--c,#f59e0b)}
+.sec-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.sec-icon{font-size:20px;line-height:1}
+.sec-score{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;text-align:right;line-height:1}
+.sec-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);margin-bottom:4px}
+.sec-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-bottom:8px}
+.sec-progress{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.sec-prog-fill{height:100%;border-radius:3px;transition:width .7s ease}
+.sec-qs{display:flex;gap:3px;flex-wrap:wrap}
+.sec-q-chip{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.sec-q-chip:hover{opacity:.8}
+.sec-alert{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--text3);margin-top:6px}
+
+/* SCORE COLORS */
+.score-col{--c:var(--red)}
+.score-ok{--c:var(--amber)}
+.score-good{--c:var(--green)}
+
+/* STAT BAR */
+.stat-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--surface3);font-size:12px}
+.stat-row:last-child{border-bottom:none}
+.stat-name{color:var(--text2);font-weight:500;flex-shrink:0;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-bar-wrap{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.stat-bar{height:100%;border-radius:3px;transition:width .5s}
+.stat-val{font-size:12px;font-weight:700;min-width:38px;text-align:right}
+
+/* Q ROW */
+.q-row{padding:10px 14px;border-bottom:1px solid var(--surface3);display:flex;align-items:center;gap:12px;transition:background .15s}
+.q-row:last-child{border-bottom:none}
+.q-row:hover{background:var(--surface2)}
+.q-num{width:30px;height:30px;border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#fff}
+.q-text{flex:1;font-size:12px;color:var(--text2);line-height:1.4}
+.q-avg{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;min-width:42px;text-align:right}
+.q-dist{display:flex;gap:2px;min-width:90px}
+.q-d-seg{height:18px;border-radius:2px;min-width:2px;transition:width .4s}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%}
+
+/* HIGHLIGHT */
+.hl{border-left:3px solid;border-radius:0 var(--r-xs) var(--r-xs) 0;padding:10px 14px;margin-bottom:8px;font-size:12px;line-height:1.5}
+.hl-red{border-color:var(--red);background:var(--red-dim);color:#fca5a5}
+.hl-green{border-color:var(--green);background:var(--green-dim);color:#6ee7b7}
+.hl-amber{border-color:var(--accent);background:var(--accent-dim);color:#fcd34d}
+
+/* COMPARISON */
+.cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cmp-label{width:80px;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0}
+.cmp-track{flex:1;height:20px;background:var(--surface3);border-radius:4px;overflow:hidden;position:relative}
+.cmp-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:#000;transition:width .6s ease;white-space:nowrap;overflow:hidden}
+.cmp-val{font-size:12px;font-weight:700;min-width:36px;text-align:right}
+
+/* HEATMAP */
+.hm-wrap{overflow-x:auto}
+.hm-tbl{border-collapse:separate;border-spacing:3px}
+.hm-th{font-size:10px;font-weight:700;color:var(--text3);text-align:center;padding:3px 4px;white-space:nowrap}
+.hm-td-label{font-size:11px;color:var(--text2);padding:3px 10px 3px 0;white-space:nowrap;text-align:right;font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.hm-cell{width:38px;height:32px;border-radius:5px;text-align:center;font-size:10px;font-weight:700;color:#fff;cursor:default;transition:transform .12s;vertical-align:middle}
+.hm-cell:hover{transform:scale(1.15);z-index:10;position:relative}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:4px}
+.tab{padding:7px 16px;border-radius:var(--r-xs);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text2);font-family:inherit;transition:all .15s}
+.tab.active{background:var(--accent);color:#000}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:16px 0}
+
+/* SCORE SCORE-BY-SCORE */
+.score-chip{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;font-size:11px;font-weight:700;color:#fff}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}.section-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.wrap{flex-direction:column}.sidebar{width:100%;max-height:none;position:static}.g3,.section-grid{grid-template-columns:1fr 1fr}.g5{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.g2,.g3,.g4,.section-grid{grid-template-columns:1fr}}
+
+/* SPECIAL: section drill panel */
+.drill-panel{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:18px;margin-top:12px;animation:fadeUp .2s ease}
+.drill-panel.open{display:block}
+
+/* ── ENGAGEMENT PAGE ─────────────────────────────── */
+.eng-hero{background:linear-gradient(135deg,var(--surface2) 0%,#1a2540 100%);border:1px solid var(--border2);border-radius:var(--r);padding:28px 32px;margin-bottom:16px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;position:relative;overflow:hidden}
+.eng-hero::before{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:var(--accent);opacity:.04}
+.eng-pct-ring{position:relative;width:140px;height:140px;flex-shrink:0}
+.eng-pct-ring svg{transform:rotate(-90deg)}
+.eng-pct-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.eng-pct-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--accent);line-height:1}
+.eng-pct-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+.eng-hero-text{flex:1;min-width:200px}
+.eng-hero-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:8px}
+.eng-hero-sub{font-size:13px;color:var(--text2);line-height:1.6}
+.eng-cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.eng-cat-chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.eng-cat-dot{width:7px;height:7px;border-radius:50%}
+
+.dist-bar-wrap{display:flex;height:36px;border-radius:8px;overflow:hidden;margin:12px 0;gap:2px}
+.dist-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;transition:width .6s ease;min-width:0;overflow:hidden;cursor:default;position:relative}
+.dist-seg:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e2535;color:var(--text);padding:4px 8px;border-radius:5px;font-size:10px;white-space:nowrap;border:1px solid var(--border2);z-index:50}
+
+.dim-bar-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--surface3)}
+.dim-bar-row:last-child{border-bottom:none}
+.dim-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.dim-name{font-size:12px;font-weight:600;color:var(--text2);width:110px;flex-shrink:0}
+.dim-track{flex:1;height:10px;background:var(--surface3);border-radius:5px;overflow:hidden}
+.dim-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.dim-pct{font-size:12px;font-weight:700;min-width:44px;text-align:right}
+.dim-flag{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;flex-shrink:0}
+
+.gap-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--surface3);border-radius:0;transition:background .15s}
+.gap-row:last-child{border-bottom:none}
+.gap-row:hover{background:var(--surface2)}
+.gap-row.bottom3{background:var(--red-dim);border-left:3px solid var(--red)}
+.gap-dim{font-size:12px;font-weight:600;color:var(--text2);flex:1}
+.gap-overall{font-size:12px;font-weight:700;color:var(--green);min-width:50px;text-align:center}
+.gap-noteng{font-size:12px;font-weight:700;color:var(--red);min-width:50px;text-align:center}
+.gap-diff{font-size:12px;font-weight:700;min-width:50px;text-align:center;padding:2px 8px;border-radius:10px}
+
+.insight-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.insight-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#000}
+.insight-body{flex:1}
+.insight-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.insight-text{font-size:12px;color:var(--text2);line-height:1.5}
+.insight-gap{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:5px}
+
+.risk-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--surface3)}
+.risk-row:last-child{border-bottom:none}
+.risk-label{font-size:12px;color:var(--text2);font-weight:500;width:110px;flex-shrink:0}
+.risk-group{font-size:12px;font-weight:700;color:var(--red);flex:1}
+.risk-pct{font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--red-dim);color:var(--red)}
+
+.eng-table{width:100%;border-collapse:collapse;font-size:12px}
+.eng-table th{background:var(--surface2);padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border2)}
+.eng-table td{padding:8px 12px;border-bottom:1px solid var(--surface3);vertical-align:middle}
+.eng-table tr:hover td{background:var(--surface2)}
+.cat-pill{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <span class="logo-pill">BOROSIL</span>
+    <div>
+      <div class="hdr-title">Employee Engagement Survey</div>
+      <div class="hdr-sub">Section-wise Analysis · 100 Respondents</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-dot"></div>
+    <span class="badge" id="hdr-count">100 Responses</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="sb-label">Navigate</div>
+    <button class="nav-btn active" onclick="showPage('sections',this)"><span class="nav-icon">🗂️</span>Section Overview</button>
+    <button class="nav-btn" onclick="showPage('engagement',this)"><span class="nav-icon">🔥</span>Engagement Analytics</button>
+    <button class="nav-btn" onclick="showPage('overview',this)"><span class="nav-icon">📊</span>Demographics</button>
+    <button class="nav-btn" onclick="showPage('compare',this)"><span class="nav-icon">⚖️</span>Division Compare</button>
+    <button class="nav-btn" onclick="showPage('heatmap',this)"><span class="nav-icon">🌡️</span>Heatmap</button>
+    <button class="nav-btn" onclick="showPage('problems',this)"><span class="nav-icon">⚠️</span>Problem Areas</button>
+    <button class="nav-btn" onclick="showPage('individual',this)"><span class="nav-icon">👤</span>Individual View</button>
+
+    <div class="sb-label">Filters</div>
+    <label class="filter-label">Division</label>
+    <select id="f-div" onchange="applyFilters()">
+      <option value="">All Divisions</option>
+      <option>Production</option><option>Quality</option><option>Maintenance</option><option>HR</option>
+    </select>
+    <label class="filter-label">Subdivision</label>
+    <select id="f-sub" onchange="applyFilters()">
+      <option value="">All</option><option>A</option><option>B</option><option>C</option>
+    </select>
+    <label class="filter-label">Responsibility</label>
+    <select id="f-level" onchange="applyFilters()">
+      <option value="">All Levels</option>
+      <option>IC</option><option>MIC</option><option>MM1</option><option>MM2</option><option>TL</option>
+    </select>
+    <label class="filter-label">Gender</label>
+    <select id="f-gender" onchange="applyFilters()">
+      <option value="">All</option><option>Male</option><option>Female</option><option>Others</option>
+    </select>
+    <label class="filter-label">Age Group</label>
+    <select id="f-age" onchange="applyFilters()">
+      <option value="">All Ages</option>
+      <option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55+</option>
+    </select>
+    <label class="filter-label">Years of Service</label>
+    <select id="f-tenure" onchange="applyFilters()">
+      <option value="">All Tenure</option>
+      <option>0-1</option><option>1-3</option><option>3-5</option><option>5-8</option><option>8-12</option><option>12-20</option><option>20+</option>
+    </select>
+    <button class="btn-reset" onclick="resetFilters()">✕ Reset Filters</button>
+    <div class="filter-count"><strong id="fc">100</strong> records selected</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- PAGE: SECTIONS -->
+    <div id="page-sections" class="page active">
+      <div class="ph">
+        <div class="ph-eyebrow">Core Analysis</div>
+        <div class="ph-title">Section-wise Scores</div>
+        <div class="ph-sub">Each section groups related questions — click any section to drill into its Q-by-Q breakdown</div>
+      </div>
+      <!-- Overall summary strip -->
+      <div class="g4 mb" id="sec-summary-metrics"></div>
+      <!-- Section cards grid -->
+      <div class="section-grid" id="section-cards"></div>
+      <!-- Drill panel -->
+      <div class="drill-panel" id="drill-panel">
+        <div id="drill-content"></div>
+      </div>
+      <!-- Radar -->
+      <div class="card mt" style="margin-top:16px">
+        <div class="card-title"><span class="ct-dot" style="background:var(--accent)"></span>All Sections — Score Profile (Radar)</div>
+        <div class="chart-wrap" style="height:360px"><canvas id="radar-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- PAGE: ENGAGEMENT ANALYTICS -->
+    <div id="page-engagement" class="page">
+      <div class="ph">
+        <div class="ph-eyebrow">Engagement Intelligence</div>
+        <div class="ph-title">Employee Engagement Analytics</div>
+        <div class="ph-sub">Categorisation · Dimension Scores · Disengagement Drivers · High-Risk Groups — all filters apply dynamically</div>
+      </div>
+
+      <!-- HERO: Engagement % ring + distribution chips -->
+      <div class="eng-hero">
+        <div class="eng-pct-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#252e42" stroke-width="12"/>
+            <circle id="eng-ring-arc" cx="70" cy="70" r="58" fill="none" stroke="#f59e0b" stroke-width="12" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4" style="transition:stroke-dashoffset .8s ease"/>
+          </svg>
+          <div class="eng-pct-val">
+            <div class="eng-pct-num" id="eng-pct-num">–%</div>
+            <div class="eng-pct-lbl">Engaged</div>
+          </div>
+        </div>
+        <div class="eng-hero-text">
+          <div class="eng-hero-title">Engagement Score</div>
+          <div class="eng-hero-sub">Engagement % = Engaged + Super Engaged employees.<br>Range: 1.0–1.8 Super Disengaged · 1.8–2.6 Disengaged · 2.6–3.4 Neutral · 3.4–4.2 Engaged · 4.2–5.0 Super Engaged</div>
+          <div class="eng-cats" id="eng-cat-chips"></div>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px">Distribution</div>
+          <div class="dist-bar-wrap" id="eng-dist-bar"></div>
+          <div id="eng-dist-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:10px;color:var(--text2)"></div>
+        </div>
+      </div>
+
+      <!-- METRICS ROW -->
+      <div class="g4 mb" id="eng-metrics"></div>
+
+      <!-- DISTRIBUTION + DIMENSION SCORES -->
+      <div class="g2 mb">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--accent)"></span>Engagement Category Distribution</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="eng-dist-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--blue)"></span>Key Dimension Scores (% converted)</div>
+          <div id="eng-dim-bars"></div>
+        </div>
+      </div>
+
+      <!-- DISENGAGEMENT ANALYSIS HEADER -->
+      <div style="border-left:3px solid var(--red);padding:10px 16px;background:var(--red-dim);border-radius:0 var(--r-sm) var(--r-sm) 0;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:#fca5a5;margin-bottom:3px">🔥 Disengagement Analysis</div>
+        <div style="font-size:12px;color:var(--text2)">Analysing the <strong id="not-eng-count" style="color:var(--red)">–</strong> Not Engaged employees (Super Disengaged + Disengaged + Neutral) to identify root causes</div>
+      </div>
+
+      <!-- GAP ANALYSIS + CHART -->
+      <div class="g2 mb">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--red)"></span>Not Engaged — Dimension Scores (%)</div>
+          <div id="noteng-dim-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--purple)"></span>Overall vs Not Engaged — Gap Chart</div>
+          <div class="chart-wrap" style="height:260px"><canvas id="gap-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- GAP TABLE -->
+      <div class="card mb">
+        <div class="card-title"><span class="ct-dot" style="background:var(--orange)"></span>Dimension Gap Table — Overall vs Not Engaged</div>
+        <div style="overflow-x:auto">
+          <table class="eng-table">
+            <thead><tr>
+              <th>Dimension</th>
+              <th style="text-align:center">Overall %</th>
+              <th style="text-align:center">Not Engaged %</th>
+              <th style="text-align:center">Gap</th>
+              <th>Status</th>
+            </tr></thead>
+            <tbody id="gap-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- KEY DRIVERS INSIGHT SECTION -->
+      <div class="card mb">
+        <div class="card-title"><span class="ct-dot" style="background:var(--red)"></span>🔍 Key Drivers of Disengagement — Auto-Generated Insights</div>
+        <div id="eng-insights"></div>
+      </div>
+
+      <!-- HIGH RISK GROUPS -->
+      <div class="g2 mb">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--rose)"></span>High-Risk Groups by Dimension</div>
+          <div id="risk-groups"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--violet)"></span>Disengagement Rate by Category</div>
+          <div class="chart-wrap" style="height:260px"><canvas id="risk-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- EMPLOYEE LEVEL TABLE -->
+      <div class="card">
+        <div class="card-title"><span class="ct-dot" style="background:var(--teal)"></span>All Employees — Engagement Score & Category</div>
+        <div style="overflow-x:auto;max-height:340px;overflow-y:auto">
+          <table class="eng-table">
+            <thead style="position:sticky;top:0"><tr>
+              <th>#</th><th>Division</th><th>Level</th><th>Gender</th><th>Tenure</th>
+              <th style="text-align:center">Eng. Score</th><th style="text-align:center">Category</th>
+            </tr></thead>
+            <tbody id="eng-emp-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: DEMOGRAPHICS -->
+    <div id="page-overview" class="page">
+      <div class="ph">
+        <div class="ph-eyebrow">Workforce Profile</div>
+        <div class="ph-title">Demographics Overview</div>
+        <div class="ph-sub">Respondent breakdown by division, level, gender, age, and tenure</div>
+      </div>
+      <div class="g4" id="dem-metrics"></div>
+      <div class="g3">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--blue)"></span>Division</div>
+          <div id="dem-div-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--purple)"></span>Responsibility Level</div>
+          <div id="dem-level-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--teal)"></span>Tenure (Years)</div>
+          <div id="dem-tenure-bars"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--pink)"></span>Gender Distribution</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-gender"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--orange)"></span>Age Group Distribution</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-age"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: COMPARE -->
+    <div id="page-compare" class="page">
+      <div class="ph">
+        <div class="ph-eyebrow">Comparative</div>
+        <div class="ph-title">Division × Section Comparison</div>
+        <div class="ph-sub">Compare how each division scored across every engagement section</div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="setCmpMode('bar',this)">Bar Chart</button>
+        <button class="tab" onclick="setCmpMode('section',this)">Section Table</button>
+      </div>
+      <div id="cmp-bar-view">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--blue)"></span>Section Scores by Division</div>
+          <div class="chart-wrap" style="height:360px"><canvas id="cmp-chart"></canvas></div>
+        </div>
+      </div>
+      <div id="cmp-section-view" style="display:none">
+        <div id="cmp-table-content"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: HEATMAP -->
+    <div id="page-heatmap" class="page">
+      <div class="ph">
+        <div class="ph-eyebrow">Visual Analysis</div>
+        <div class="ph-title">Score Heatmap</div>
+        <div class="ph-sub">Division × Section avg scores — darker green = higher, red = areas of concern</div>
+      </div>
+      <div class="card mb">
+        <div class="card-title"><span class="ct-dot" style="background:var(--accent)"></span>Division × Section Heatmap</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--text3);align-items:center">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#ef4444;border-radius:3px;display:inline-block"></span>≤ 2.5 Critical</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#f97316;border-radius:3px;display:inline-block"></span>2.5–3.0 Low</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#eab308;border-radius:3px;display:inline-block"></span>3.0–3.5 Neutral</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#22c55e;border-radius:3px;display:inline-block"></span>3.5–4.0 Good</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#16a34a;border-radius:3px;display:inline-block"></span>≥ 4.0 Excellent</span>
+        </div>
+        <div class="hm-wrap"><div id="heatmap-inner"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot" style="background:var(--teal)"></span>Question-level Heatmap (All Questions)</div>
+        <div class="hm-wrap"><div id="heatmap-q-inner"></div></div>
+      </div>
+    </div>
+
+    <!-- PAGE: PROBLEMS -->
+    <div id="page-problems" class="page">
+      <div class="ph">
+        <div class="ph-eyebrow">Attention Required</div>
+        <div class="ph-title">Problem Areas & Highlights</div>
+        <div class="ph-sub">Lowest scoring sections and questions that need management attention</div>
+      </div>
+      <div id="prob-alerts" class="mb"></div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--red)"></span>Bottom 5 Questions</div>
+          <div id="prob-bottom"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--green)"></span>Top 5 Questions</div>
+          <div id="prob-top"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--red)"></span>Worst Sections by Division</div>
+          <div id="prob-worst-sections"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--accent)"></span>Score 1 (Highly Disagree) Rate</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-dis-rate"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: INDIVIDUAL -->
+    <div id="page-individual" class="page">
+      <div class="ph">
+        <div class="ph-eyebrow">Respondent Profile</div>
+        <div class="ph-title">Individual View</div>
+        <div class="ph-sub">Full section-by-section breakdown for each respondent</div>
+      </div>
+      <div class="card mb">
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div style="flex:1;min-width:140px">
+            <label class="filter-label" style="display:block;margin-bottom:4px">Select Respondent</label>
+            <select id="ind-sel" onchange="renderIndividual()" style="margin-bottom:0"></select>
+          </div>
+          <div id="ind-meta" style="flex:2;font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:12px;padding-bottom:2px"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--blue)"></span>Section Scores</div>
+          <div id="ind-sections"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot" style="background:var(--purple)"></span>Score Radar</div>
+          <div class="chart-wrap" style="height:280px"><canvas id="ind-radar"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot" style="background:var(--teal)"></span>All 47 Responses</div>
+        <div id="ind-all-qs"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// SECTION DEFINITIONS  (from Borosil PDF)
+// ════════════════════════════════════════════════════════
+const SECTIONS = [
+  {id:'company',      name:'Company',                 emoji:'🏢', qs:[1,2,3],    color:'#3b82f6'},
+  {id:'leadership',   name:'Leadership',              emoji:'👔', qs:[4,5,6],    color:'#a855f7'},
+  {id:'job',          name:'Job',                     emoji:'💼', qs:[7,8,9],    color:'#06b6d4'},
+  {id:'reward',       name:'Reward & Recognition',    emoji:'🏆', qs:[10,11,12], color:'#f59e0b'},
+  {id:'communication',name:'Communication',           emoji:'💬', qs:[13,14,15], color:'#ec4899'},
+  {id:'teamwork',     name:'Teamwork',                emoji:'🤝', qs:[16,17,18], color:'#10b981'},
+  {id:'training',     name:'Training & Development',  emoji:'📚', qs:[19,20,21], color:'#f97316'},
+  {id:'physical',     name:'Physical Environment',    emoji:'🏭', qs:[22,23,24], color:'#84cc16'},
+  {id:'social',       name:'Social Environment',      emoji:'🌱', qs:[25,26,27], color:'#22d3ee'},
+  {id:'security',     name:'Job Security',            emoji:'🔒', qs:[28,29,30], color:'#8b5cf6'},
+  {id:'goal',         name:'Goal Alignment',          emoji:'🎯', qs:[31,32,33], color:'#6366f1'},
+  {id:'improvement',  name:'Improvement Orientation', emoji:'🔧', qs:[34,35,36], color:'#f43f5e'},
+  {id:'compensation', name:'Compensation',            emoji:'💰', qs:[37,38,39], color:'#d97706'},
+  {id:'grievance',    name:'Grievance Redressal',     emoji:'📢', qs:[40,41,42], color:'#059669'},
+  {id:'conflict',     name:'Conflict Resolution',     emoji:'⚖️', qs:[43,44,45], color:'#ef4444'},
+  {id:'belief',       name:'Belief in Action',        emoji:'🌟', qs:[46],       color:'#fbbf24'},
+  {id:'overall',      name:'Overall Satisfaction',    emoji:'😊', qs:[47],       color:'#4ade80'},
+];
+
+const Q_TEXTS = {
+  1:"I like the work culture at Borosil.",
+  2:"I believe that my company cares for its employees.",
+  3:"I am proud to be an employee of Borosil.",
+  4:"My superiors play a vital role in my motivation.",
+  5:"I enjoy a good relationship with my superiors.",
+  6:"My superiors are fair and impartial.",
+  7:"I like my role and responsibilities.",
+  8:"I am given sufficient freedom to do my job.",
+  9:"I am given the right tools and equipments to do my job.",
+  10:"Good work is duly recognized at Borosil.",
+  11:"Borosil equally rewards good work.",
+  12:"The reward and recognition process at Borosil is fair and transparent.",
+  13:"Communication framework at Borosil is effective and time efficient.",
+  14:"I receive timely and proper feedback about my work.",
+  15:"I am satisfied with the communication forums available to employees at Borosil.",
+  16:"I share good relation with my co-workers.",
+  17:"My co-workers and I work together to solve problems at work.",
+  18:"I am satisfied with the level of cooperation between my department and other departments.",
+  19:"I receive necessary training to do my job well.",
+  20:"I get opportunities to visit other plants to learn best practices.",
+  21:"Working at Borosil helps me develop as a professional.",
+  22:"I am satisfied with the quality of amenities provided at my workplace.",
+  23:"I feel safe at my workplace.",
+  24:"The environment at my workplace is conducive to my productivity.",
+  25:"Borosil takes care of my life outside my workplace.",
+  26:"I am satisfied with the quality of facilities extended to me outside my workplace.",
+  27:"My lifestyle has improved while working for Borosil.",
+  28:"I feel that my job is secure at Borosil.",
+  29:"I am satisfied with the promotion policy of Borosil.",
+  30:"I find Borosil a good place to build my career.",
+  31:"I am aware of the targets of my company.",
+  32:"I know what is expected of me at my job.",
+  33:"I am aligned with the vision of my company.",
+  34:"I get opportunities to participate in decision making at my department.",
+  35:"Suggestions are openly received and timely implemented at Borosil.",
+  36:"Borosil encourages new ways of doing things.",
+  37:"I am given equitable remuneration for my work.",
+  38:"I am satisfied with the incentives given for higher productivity.",
+  39:"Wages are paid timely at Borosil.",
+  40:"There are appropriate channels to voice grievances at Borosil.",
+  41:"My grievances are given importance at Borosil.",
+  42:"Voiced grievances are timely acted upon at Borosil.",
+  43:"Attempts are made to avoid conflicts at Borosil.",
+  44:"There are appropriate systems in place at Borosil to resolve conflicts.",
+  45:"Conflicts are resolved timely at Borosil.",
+  46:"I believe that the findings of this survey will be acted upon.",
+  47:"I am satisfied working for Borosil.",
+};
+
+// ════════════════════════════════════════════════════════
+// SYNTHETIC DATA (100 respondents × 47 questions)
+// Seeded to be realistic — some sections genuinely weaker
+// ════════════════════════════════════════════════════════
+function seededRand(seed){let s=seed;return function(){s=(s*9301+49297)%233280;return s/233280;}}
+const sr=seededRand(42);
+function clamp(v){return Math.max(1,Math.min(5,v))}
+
+// Section base scores (some intentionally lower for realistic patterns)
+const SEC_BASE={
+  company:3.6,leadership:3.4,job:3.7,reward:2.9,communication:3.1,
+  teamwork:3.8,training:3.0,physical:3.4,social:2.8,security:3.2,
+  goal:3.6,improvement:2.7,compensation:2.5,grievance:2.6,conflict:2.8,
+  belief:3.0,overall:3.3
+};
+
+const DIVS=["Production","Quality","Maintenance","HR"];
+const DIV_MODS={Production:0.1,Quality:0.05,Maintenance:-0.1,HR:0.15};
+const LEVELS=["IC","MIC","MM1","MM2","TL"];
+const AGES=["18-24","25-34","35-44","45-54","55+"];
+const TENURES=["0-1","1-3","3-5","5-8","8-12","12-20","20+"];
+const GENDERS=["Male","Female","Others"];
+
+function secForQ(qi){
+  for(const s of SECTIONS)if(s.qs.includes(qi))return s;
+  return null;
+}
+
+const RAW=[];
+for(let i=0;i<100;i++){
+  const div=DIVS[Math.floor(sr()*DIVS.length)];
+  const sub=["A","B","C"][Math.floor(sr()*3)];
+  const level=LEVELS[Math.floor(sr()*LEVELS.length)];
+  const gender=sr()<0.55?"Male":sr()<0.9?"Female":"Others";
+  const age=AGES[Math.floor(sr()*AGES.length)];
+  const tenure=TENURES[Math.floor(sr()*TENURES.length)];
+  const divMod=DIV_MODS[div]||0;
+  const personalBias=(sr()-0.5)*0.6;
+  const qs={};
+  for(let qi=1;qi<=47;qi++){
+    const sec=secForQ(qi);
+    const base=SEC_BASE[sec.id]+divMod+personalBias;
+    const noise=(sr()-0.5)*1.6;
+    qs[qi]=clamp(Math.round(base+noise));
+  }
+  RAW.push({id:i+1,div,sub,level,gender,age,tenure,...qs});
+}
+
+// ════════════════════════════════════════════════════════
+// STATE & HELPERS
+// ════════════════════════════════════════════════════════
+let FILTERED=[...RAW];
+let activeDrill=null;
+
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
+function qavg(data,qi){return avg(data.map(r=>r[qi]))}
+function secAvg(data,sec){return avg(sec.qs.map(qi=>qavg(data,qi)))}
+function secAvgAll(data){return SECTIONS.map(s=>+secAvg(data,s).toFixed(2))}
+function rowAvg(row){let s=0;for(let i=1;i<=47;i++)s+=row[i];return s/47;}
+function qDist(data,qi){const c=[0,0,0,0,0];data.forEach(r=>c[r[qi]-1]++);return c;}
+function hmColor(v){
+  if(v>=4.0)return '#16a34a';
+  if(v>=3.5)return '#22c55e';
+  if(v>=3.0)return '#eab308';
+  if(v>=2.5)return '#f97316';
+  return '#ef4444';
+}
+function scoreColorHex(s){return['#ef4444','#f97316','#eab308','#22c55e','#16a34a'][s-1]}
+function scoreCls(v){return v<2.7?'score-col':v<3.4?'score-ok':'score-good'}
+function scoreLabel(v){return v>=4?'Excellent':v>=3.5?'Good':v>=3?'Neutral':v>=2.5?'Low':'Critical'}
+function scoreLabelColor(v){return v>=4?'var(--green)':v>=3.5?'var(--lime)':v>=3?'var(--accent)':v>=2.5?'var(--orange)':'var(--red)'}
+
+// ════════════════════════════════════════════════════════
+// FILTERS
+// ════════════════════════════════════════════════════════
+function applyFilters(){
+  const fDiv=document.getElementById('f-div').value;
+  const fSub=document.getElementById('f-sub').value;
+  const fLevel=document.getElementById('f-level').value;
+  const fGender=document.getElementById('f-gender').value;
+  const fAge=document.getElementById('f-age').value;
+  const fTenure=document.getElementById('f-tenure').value;
+  FILTERED=RAW.filter(r=>
+    (!fDiv||r.div===fDiv)&&(!fSub||r.sub===fSub)&&(!fLevel||r.level===fLevel)&&
+    (!fGender||r.gender===fGender)&&(!fAge||r.age===fAge)&&(!fTenure||r.tenure===fTenure)
+  );
+  document.getElementById('fc').textContent=FILTERED.length;
+  document.getElementById('hdr-count').textContent=FILTERED.length+' Responses';
+  renderActive();
+}
+function resetFilters(){
+  ['f-div','f-sub','f-level','f-gender','f-age','f-tenure'].forEach(id=>document.getElementById(id).value='');
+  applyFilters();
+}
+
+// ════════════════════════════════════════════════════════
+// CHART REGISTRY
+// ════════════════════════════════════════════════════════
+const charts={};
+function mkChart(id,cfg){if(charts[id]){charts[id].destroy();delete charts[id];}charts[id]=new Chart(document.getElementById(id),cfg);return charts[id];}
+
+// ════════════════════════════════════════════════════════
+// PAGE: SECTIONS
+// ════════════════════════════════════════════════════════
+function renderSections(){
+  const d=FILTERED;
+  // Summary metrics
+  const overallAvg=avg(d.map(rowAvg));
+  const secAvgs=SECTIONS.map(s=>secAvg(d,s));
+  const worstSec=SECTIONS[secAvgs.indexOf(Math.min(...secAvgs))];
+  const bestSec=SECTIONS[secAvgs.indexOf(Math.max(...secAvgs))];
+  const critCount=secAvgs.filter(v=>v<3).length;
+
+  document.getElementById('sec-summary-metrics').innerHTML=`
+    <div class="metric">
+      <div class="metric-val" style="color:var(--accent)">${overallAvg.toFixed(2)}</div>
+      <div class="metric-label">Overall Avg</div>
+      <div class="metric-sub">Across all 47 questions</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:${overallAvg/5*100}%;background:var(--accent)"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--red)">${critCount}</div>
+      <div class="metric-label">Sections Below 3.0</div>
+      <div class="metric-sub">Need urgent attention</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--red);font-size:20px;padding-top:4px">${worstSec.emoji} ${worstSec.name}</div>
+      <div class="metric-label">Lowest Section</div>
+      <div class="metric-sub">${secAvg(d,worstSec).toFixed(2)} / 5.00</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--green);font-size:20px;padding-top:4px">${bestSec.emoji} ${bestSec.name}</div>
+      <div class="metric-label">Highest Section</div>
+      <div class="metric-sub">${secAvg(d,bestSec).toFixed(2)} / 5.00</div>
+    </div>`;
+
+  // Section cards
+  const cardsHtml=SECTIONS.map(sec=>{
+    const sv=secAvg(d,sec);
+    const cls=scoreCls(sv);
+    const label=scoreLabel(sv);
+    const labelColor=scoreLabelColor(sv);
+    const qChips=sec.qs.map(qi=>{
+      const qv=qavg(d,qi);
+      return `<span class="sec-q-chip" style="background:${hmColor(qv)}33;color:${hmColor(qv)}" title="Q${qi}: ${qv.toFixed(2)}"  onclick="event.stopPropagation();drillToQ(${qi})">Q${qi}: ${qv.toFixed(2)}</span>`;
+    }).join('');
+    const alertMsg=sv<3?`<div class="sec-alert">⚠️ Needs attention</div>`:
+                   sv<3.5?`<div class="sec-alert" style="color:var(--accent)">○ Moderate</div>`:
+                   `<div class="sec-alert" style="color:var(--green)">✓ On track</div>`;
+    return `<div class="sec-card ${cls}" style="--c:${sec.color}" onclick="toggleDrill('${sec.id}')">
+      <div class="sec-header">
+        <div>
+          <div style="font-size:22px;margin-bottom:4px">${sec.emoji}</div>
+          <div class="sec-name">${sec.name}</div>
+        </div>
+        <div>
+          <div class="sec-score" style="color:${sec.color}">${sv.toFixed(2)}</div>
+          <div style="font-size:9px;text-align:right;color:var(--text3)">/ 5.00</div>
+        </div>
+      </div>
+      <div class="sec-badge" style="background:${labelColor}22;color:${labelColor}">${label}</div>
+      <div class="sec-progress"><div class="sec-prog-fill" style="width:${sv/5*100}%;background:${sec.color}"></div></div>
+      <div class="sec-qs">${qChips}</div>
+      ${alertMsg}
+    </div>`;
+  }).join('');
+  document.getElementById('section-cards').innerHTML=cardsHtml;
+
+  // Radar chart
+  const radarData=SECTIONS.map(s=>+secAvg(d,s).toFixed(2));
+  mkChart('radar-chart',{
+    type:'radar',
+    data:{
+      labels:SECTIONS.map(s=>s.emoji+' '+s.name),
+      datasets:[{
+        label:'Avg Score',data:radarData,
+        borderColor:SECTIONS.map(s=>s.color),
+        backgroundColor:'rgba(245,158,11,0.08)',
+        borderWidth:2,pointBackgroundColor:SECTIONS.map(s=>s.color),
+        pointRadius:5,fill:true
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{min:1,max:5,ticks:{stepSize:1,color:'var(--text3)',font:{size:9},backdropColor:'transparent'},
+        grid:{color:'var(--border2)'},pointLabels:{color:'var(--text2)',font:{size:11}},angleLines:{color:'var(--border2)'}}}}
+  });
+}
+
+function toggleDrill(secId){
+  const panel=document.getElementById('drill-panel');
+  if(activeDrill===secId){activeDrill=null;panel.classList.remove('open');return;}
+  activeDrill=secId;
+  panel.classList.add('open');
+  renderDrill(secId);
+  // scroll
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function renderDrill(secId){
+  const sec=SECTIONS.find(s=>s.id===secId);
+  const d=FILTERED;
+  const sv=secAvg(d,sec).toFixed(2);
+  let html=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+    <span style="font-size:28px">${sec.emoji}</span>
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--text)">${sec.name}</div>
+      <div style="font-size:12px;color:var(--text2)">Section average: <strong style="color:${sec.color}">${sv} / 5.00</strong></div>
+    </div>
+    <button onclick="toggleDrill('${secId}')" style="margin-left:auto;background:var(--surface3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--r-xs);padding:6px 12px;cursor:pointer;font-size:12px;font-family:inherit">✕ Close</button>
+  </div>`;
+
+  // Q-by-Q rows
+  html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:14px">`;
+  sec.qs.forEach(qi=>{
+    const qv=qavg(d,qi).toFixed(2);
+    const dist=qDist(d,qi);
+    const total=dist.reduce((a,b)=>a+b,0)||1;
+    const segs=dist.map((c,i)=>`<div class="q-d-seg" style="width:${c/total*100}%;background:${scoreColorHex(i+1)}" title="Score ${i+1}: ${c}"></div>`).join('');
+    html+=`<div class="q-row">
+      <div class="q-num" style="background:${sec.color}">${qi}</div>
+      <div class="q-text">${Q_TEXTS[qi]}</div>
+      <div class="q-dist">${segs}</div>
+      <div class="q-avg" style="color:${scoreLabelColor(+qv)}">${qv}</div>
+    </div>`;
+  });
+  html+='</div>';
+
+  // Mini bar chart comparing divisions
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px">Score by Division</div>`;
+  DIVS.forEach((dv,i)=>{
+    const dvRows=d.filter(r=>r.div===dv);
+    const dvSec=dvRows.length?secAvg(dvRows,sec):0;
+    const colors=['#3b82f6','#10b981','#f97316','#a855f7'];
+    html+=`<div class="cmp-row">
+      <div class="cmp-label">${dv}</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:${dvSec/5*100}%;background:${colors[i]}">${dvSec.toFixed(2)}</div></div>
+    </div>`;
+  });
+  html+=`</div><div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px">Score by Level</div>`;
+  LEVELS.forEach(lv=>{
+    const lvRows=d.filter(r=>r.level===lv);
+    const lvSec=lvRows.length?secAvg(lvRows,sec):0;
+    html+=`<div class="cmp-row">
+      <div class="cmp-label">${lv}</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:${lvSec/5*100}%;background:${sec.color}">${lvSec.toFixed(2)}</div></div>
+    </div>`;
+  });
+  html+=`</div></div>`;
+
+  document.getElementById('drill-content').innerHTML=html;
+}
+
+function drillToQ(qi){
+  const sec=secForQ(qi);
+  if(sec){showPage('sections');toggleDrill(sec.id);}
+}
+
+// ════════════════════════════════════════════════════════
+// PAGE: DEMOGRAPHICS
+// ════════════════════════════════════════════════════════
+function renderOverview(){
+  const d=FILTERED;
+  const overall=avg(d.map(rowAvg));
+  const maleCount=d.filter(r=>r.gender==='Male').length;
+  const femCount=d.filter(r=>r.gender==='Female').length;
+  document.getElementById('dem-metrics').innerHTML=`
+    <div class="metric"><div class="metric-val" style="color:var(--accent)">${d.length}</div><div class="metric-label">Respondents</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--blue)">${overall.toFixed(2)}</div><div class="metric-label">Avg Score</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--blue)">${maleCount}</div><div class="metric-label">Male</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--pink)">${femCount}</div><div class="metric-label">Female</div></div>`;
+
+  const divCounts={};d.forEach(r=>{divCounts[r.div]=(divCounts[r.div]||0)+1});
+  renderStatBars('dem-div-bars',divCounts,'var(--blue)');
+  const lvlCounts={};d.forEach(r=>{lvlCounts[r.level]=(lvlCounts[r.level]||0)+1});
+  renderStatBars('dem-level-bars',lvlCounts,'var(--purple)');
+  const tenCounts={};TENURES.forEach(t=>tenCounts[t]=d.filter(r=>r.tenure===t).length);
+  renderStatBars('dem-tenure-bars',tenCounts,'var(--teal)');
+
+  const gm=d.filter(r=>r.gender==='Male').length, gf=d.filter(r=>r.gender==='Female').length, go=d.filter(r=>r.gender==='Others').length;
+  mkChart('chart-gender',{type:'doughnut',data:{labels:['Male','Female','Others'],datasets:[{data:[gm,gf,go],backgroundColor:['#3b82f6','#ec4899','#a855f7'],borderWidth:2,borderColor:'var(--surface)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'var(--text2)',font:{size:12},padding:14}}}}});
+
+  const ageCounts=AGES.map(a=>d.filter(r=>r.age===a).length);
+  mkChart('chart-age',{type:'bar',data:{labels:AGES,datasets:[{data:ageCounts,backgroundColor:['#f59e0b','#3b82f6','#10b981','#a855f7','#ef4444'],borderRadius:7,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'var(--surface3)'},ticks:{color:'var(--text2)'}},x:{grid:{display:false},ticks:{color:'var(--text2)'}}}}});
+}
+
+function renderStatBars(id,data,color){
+  const c=document.getElementById(id);if(!c)return;
+  const max=Math.max(...Object.values(data))||1;
+  c.innerHTML=Object.entries(data).map(([k,v])=>`
+    <div class="stat-row">
+      <div class="stat-name">${k}</div>
+      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${v/max*100}%;background:${color}"></div></div>
+      <div class="stat-val" style="color:var(--text2)">${v}</div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// PAGE: COMPARE
+// ════════════════════════════════════════════════════════
+let cmpMode='bar';
+function setCmpMode(mode,btn){
+  cmpMode=mode;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cmp-bar-view').style.display=mode==='bar'?'block':'none';
+  document.getElementById('cmp-section-view').style.display=mode==='section'?'block':'none';
+  renderCompare();
+}
+function renderCompare(){
+  const d=FILTERED;
+  if(cmpMode==='bar'){
+    const labels=SECTIONS.map(s=>s.emoji+' '+s.name.substring(0,12));
+    const divColors=['#3b82f6','#10b981','#f97316','#a855f7'];
+    const datasets=DIVS.map((dv,i)=>({
+      label:dv,
+      data:SECTIONS.map(s=>{const rows=d.filter(r=>r.div===dv);return rows.length?+secAvg(rows,s).toFixed(2):0;}),
+      backgroundColor:divColors[i]+'cc',borderRadius:4
+    }));
+    mkChart('cmp-chart',{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{color:'var(--text2)',font:{size:12},padding:14}}},
+      scales:{y:{min:1,max:5,grid:{color:'var(--surface3)'},ticks:{color:'var(--text2)'}},x:{grid:{display:false},ticks:{color:'var(--text2)',font:{size:10},maxRotation:45}}}}});
+  } else {
+    // Section table
+    let html=`<div class="card"><table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="padding:10px 12px;text-align:left;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.8px">Section</th>
+        ${DIVS.map(dv=>`<th style="padding:10px 12px;text-align:center;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.8px">${dv}</th>`).join('')}
+        <th style="padding:10px 12px;text-align:center;color:var(--text3);font-size:10px;text-transform:uppercase">Overall</th>
+      </tr></thead><tbody>`;
+    SECTIONS.forEach(sec=>{
+      const ovSv=secAvg(d,sec);
+      html+=`<tr style="border-bottom:1px solid var(--surface3)">
+        <td style="padding:9px 12px;color:var(--text2);font-weight:500">${sec.emoji} ${sec.name}</td>
+        ${DIVS.map(dv=>{const rows=d.filter(r=>r.div===dv);const v=rows.length?secAvg(rows,sec):0;return`<td style="padding:9px 12px;text-align:center"><span style="background:${hmColor(v)}22;color:${hmColor(v)};padding:3px 10px;border-radius:10px;font-weight:700">${v.toFixed(2)}</span></td>`;}).join('')}
+        <td style="padding:9px 12px;text-align:center"><span style="background:${hmColor(ovSv)}22;color:${hmColor(ovSv)};padding:3px 10px;border-radius:10px;font-weight:700">${ovSv.toFixed(2)}</span></td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+    document.getElementById('cmp-table-content').innerHTML=html;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// PAGE: HEATMAP
+// ════════════════════════════════════════════════════════
+function renderHeatmap(){
+  const d=FILTERED;
+  // Section heatmap: Division × Section
+  let html=`<table class="hm-tbl"><thead><tr><th class="hm-td-label"></th>`;
+  SECTIONS.forEach(s=>html+=`<th class="hm-th" title="${s.name}">${s.emoji}</th>`);
+  html+=`</tr></thead><tbody>`;
+  DIVS.forEach(dv=>{
+    const rows=d.filter(r=>r.div===dv);
+    html+=`<tr><td class="hm-td-label">${dv}</td>`;
+    SECTIONS.forEach(s=>{
+      const v=rows.length?secAvg(rows,s):0;
+      html+=`<td class="hm-cell" style="background:${hmColor(v)}" title="${dv} · ${s.name}: ${v.toFixed(2)}">${v.toFixed(1)}</td>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</tbody></table>`;
+  document.getElementById('heatmap-inner').innerHTML=html;
+
+  // Q heatmap: Division × Q
+  let qhtml=`<table class="hm-tbl"><thead><tr><th class="hm-td-label"></th>`;
+  for(let qi=1;qi<=47;qi++)qhtml+=`<th class="hm-th">Q${qi}</th>`;
+  qhtml+=`</tr></thead><tbody>`;
+  DIVS.forEach(dv=>{
+    const rows=d.filter(r=>r.div===dv);
+    qhtml+=`<tr><td class="hm-td-label">${dv}</td>`;
+    for(let qi=1;qi<=47;qi++){
+      const v=rows.length?qavg(rows,qi):0;
+      qhtml+=`<td class="hm-cell" style="background:${hmColor(v)};width:32px" title="${dv} Q${qi}: ${v.toFixed(2)}">${v.toFixed(1)}</td>`;
+    }
+    qhtml+=`</tr>`;
+  });
+  qhtml+=`</tbody></table>`;
+  document.getElementById('heatmap-q-inner').innerHTML=qhtml;
+}
+
+// ════════════════════════════════════════════════════════
+// PAGE: PROBLEMS
+// ════════════════════════════════════════════════════════
+function renderProblems(){
+  const d=FILTERED;
+  // Section alerts
+  const secSorted=[...SECTIONS].map(s=>({...s,avg:secAvg(d,s)})).sort((a,b)=>a.avg-b.avg);
+  const critSecs=secSorted.filter(s=>s.avg<3);
+  let alertsHtml='';
+  critSecs.forEach(s=>{
+    alertsHtml+=`<div class="hl hl-red">⚠️ <strong>${s.emoji} ${s.name}</strong> — Avg ${s.avg.toFixed(2)}/5.00 — Below 3.0 threshold, requires immediate attention</div>`;
+  });
+  secSorted.filter(s=>s.avg>=3&&s.avg<3.4).forEach(s=>{
+    alertsHtml+=`<div class="hl hl-amber">○ <strong>${s.emoji} ${s.name}</strong> — Avg ${s.avg.toFixed(2)}/5.00 — Moderate concern</div>`;
+  });
+  if(critSecs.length===0)alertsHtml=`<div class="hl hl-green">✓ No sections below 3.0 — all areas showing acceptable scores</div>`;
+  document.getElementById('prob-alerts').innerHTML=alertsHtml;
+
+  // Bottom 5 questions
+  const qall=[];
+  for(let qi=1;qi<=47;qi++){
+    const sec=secForQ(qi);
+    qall.push({qi,avg:+qavg(d,qi).toFixed(2),sec});
+  }
+  const sorted=[...qall].sort((a,b)=>a.avg-b.avg);
+  document.getElementById('prob-bottom').innerHTML=sorted.slice(0,5).map(x=>`
+    <div class="stat-row">
+      <div class="stat-name">Q${x.qi} (${x.sec.name.substring(0,10)})</div>
+      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${x.avg/5*100}%;background:var(--red)"></div></div>
+      <div class="stat-val" style="color:var(--red)">${x.avg}</div>
+    </div>`).join('');
+  document.getElementById('prob-top').innerHTML=[...sorted].reverse().slice(0,5).map(x=>`
+    <div class="stat-row">
+      <div class="stat-name">Q${x.qi} (${x.sec.name.substring(0,10)})</div>
+      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${x.avg/5*100}%;background:var(--green)"></div></div>
+      <div class="stat-val" style="color:var(--green)">${x.avg}</div>
+    </div>`).join('');
+
+  // Worst sections per division
+  let wstHtml='';
+  DIVS.forEach((dv,i)=>{
+    const rows=d.filter(r=>r.div===dv);
+    if(!rows.length)return;
+    const worst=SECTIONS.map(s=>({s,v:secAvg(rows,s)})).sort((a,b)=>a.v-b.v)[0];
+    const colors=['#3b82f6','#10b981','#f97316','#a855f7'];
+    wstHtml+=`<div class="stat-row">
+      <div class="stat-name" style="color:${colors[i]};font-weight:700">${dv}</div>
+      <div style="flex:1;font-size:12px;color:var(--text2)">${worst.s.emoji} ${worst.s.name}</div>
+      <div class="stat-val" style="color:var(--red)">${worst.v.toFixed(2)}</div>
+    </div>`;
+  });
+  document.getElementById('prob-worst-sections').innerHTML=wstHtml;
+
+  // Dissatisfaction (score=1) by section
+  const dis1=SECTIONS.map(s=>{
+    let cnt=0,tot=0;
+    s.qs.forEach(qi=>{d.forEach(r=>{tot++;if(r[qi]===1)cnt++;});});
+    return+(cnt/tot*100).toFixed(1);
+  });
+  mkChart('chart-dis-rate',{
+    type:'bar',
+    data:{labels:SECTIONS.map(s=>s.emoji),datasets:[{data:dis1,backgroundColor:SECTIONS.map(s=>s.color+'99'),borderColor:SECTIONS.map(s=>s.color),borderWidth:1,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>`${dis1[ctx.dataIndex]}% dissatisfied`}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%',color:'var(--text2)'},grid:{color:'var(--surface3)'}},x:{grid:{display:false},ticks:{color:'var(--text)'}}}}
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// PAGE: INDIVIDUAL
+// ════════════════════════════════════════════════════════
+function initIndividualSelect(){
+  const sel=document.getElementById('ind-sel');
+  sel.innerHTML=RAW.map(r=>`<option value="${r.id-1}">#${r.id} – ${r.div} / ${r.level}</option>`).join('');
+}
+function renderIndividual(){
+  const idx=+document.getElementById('ind-sel').value;
+  const r=RAW[idx];
+  document.getElementById('ind-meta').innerHTML=`
+    <span><strong style="color:var(--text)">Div:</strong> ${r.div}</span>
+    <span><strong style="color:var(--text)">Level:</strong> ${r.level}</span>
+    <span><strong style="color:var(--text)">Gender:</strong> ${r.gender}</span>
+    <span><strong style="color:var(--text)">Age:</strong> ${r.age}</span>
+    <span><strong style="color:var(--text)">Tenure:</strong> ${r.tenure} yrs</span>
+    <span><strong style="color:var(--text)">Avg:</strong> <b style="color:var(--accent)">${rowAvg(r).toFixed(2)}</b></span>`;
+
+  // Section scores list
+  const secRows=SECTIONS.map(s=>{
+    const sv=avg(s.qs.map(qi=>r[qi]));
+    return `<div class="stat-row">
+      <div class="stat-name">${s.emoji} ${s.name.substring(0,14)}</div>
+      <div class="stat-bar-wrap"><div class="stat-bar" style="width:${sv/5*100}%;background:${s.color}"></div></div>
+      <div class="stat-val" style="color:${scoreLabelColor(sv)}">${sv.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('ind-sections').innerHTML=secRows;
+
+  // Radar
+  mkChart('ind-radar',{
+    type:'radar',
+    data:{labels:SECTIONS.map(s=>s.emoji+' '+s.name.substring(0,8)),
+      datasets:[{label:'Score',data:SECTIONS.map(s=>+avg(s.qs.map(qi=>r[qi])).toFixed(2)),
+        borderColor:'var(--accent)',backgroundColor:'rgba(245,158,11,0.1)',
+        pointBackgroundColor:SECTIONS.map(s=>s.color),borderWidth:2,pointRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{r:{min:1,max:5,ticks:{stepSize:1,color:'var(--text3)',backdropColor:'transparent',font:{size:9}},
+        grid:{color:'var(--border2)'},pointLabels:{color:'var(--text2)',font:{size:10}},angleLines:{color:'var(--border2)'}}}}
+  });
+
+  // All Q chips
+  document.getElementById('ind-all-qs').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:5px;padding:4px 0">`+
+    Array.from({length:47},(_,i)=>{
+      const qi=i+1;const sc=r[qi];
+      return `<span class="score-chip" style="background:${scoreColorHex(sc)}" title="Q${qi}: ${Q_TEXTS[qi]}">Q${qi}</span>`;
+    }).join('')+
+    `</div><div style="margin-top:10px;font-size:11px;color:var(--text3)">Hover chips to see question text</div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// ENGAGEMENT ANALYTICS (Steps 1–15)
+// ════════════════════════════════════════════════════════
+
+// Step 1–2: Engagement Score + Category
+const ENG_CATS = [
+  {id:'superDisengaged', label:'Super Disengaged', min:1.0,  max:1.8,  color:'#7f1d1d', light:'#ef444433'},
+  {id:'disengaged',      label:'Disengaged',       min:1.8,  max:2.6,  color:'#ef4444', light:'#ef444433'},
+  {id:'neutral',         label:'Neutral',          min:2.6,  max:3.4,  color:'#eab308', light:'#eab30833'},
+  {id:'engaged',         label:'Engaged',          min:3.4,  max:4.2,  color:'#22c55e', light:'#22c55e33'},
+  {id:'superEngaged',    label:'Super Engaged',    min:4.2,  max:5.01, color:'#16a34a', light:'#16a34a33'},
+];
+
+// Step 5: Dimension definitions (4 key + extras for gap analysis)
+const DIMENSIONS = [
+  {id:'leadership',    label:'Leadership',    emoji:'👔', qs:[4,5,6]},
+  {id:'communication', label:'Communication', emoji:'💬', qs:[13,14,15]},
+  {id:'compensation',  label:'Compensation',  emoji:'💰', qs:[37,38,39]},
+  {id:'training',      label:'Training',      emoji:'📚', qs:[19,20,21]},
+  {id:'reward',        label:'Reward & Recog.',emoji:'🏆', qs:[10,11,12]},
+  {id:'improvement',   label:'Improvement',   emoji:'🔧', qs:[34,35,36]},
+  {id:'grievance',     label:'Grievance',     emoji:'📢', qs:[40,41,42]},
+  {id:'social',        label:'Social Env.',   emoji:'🌱', qs:[25,26,27]},
+];
+
+function engScore(row){let s=0;for(let i=1;i<=47;i++)s+=row[i];return s/47;}
+function engCat(score){
+  for(const c of ENG_CATS){if(score>=c.min&&score<c.max)return c;}
+  return ENG_CATS[ENG_CATS.length-1];
+}
+function dimScore(data, dim){
+  // avg of q scores across employees
+  return avg(data.flatMap(r=>dim.qs.map(qi=>r[qi]).filter(v=>v>=1&&v<=5)));
+}
+function dimPct(avgScore){return+((avgScore-1)/4*100).toFixed(1);}
+
+function renderEngagement(){
+  const d = FILTERED;
+  if(!d.length){
+    document.getElementById('page-engagement').innerHTML='<div class="card" style="text-align:center;padding:40px;color:var(--text3)">No data matches current filters.</div>';
+    return;
+  }
+
+  // Step 1–2: Compute scores and categories
+  const empScores = d.map(r=>({...r, _score:engScore(r), _cat:engCat(engScore(r))}));
+  const catCounts = {};
+  ENG_CATS.forEach(c=>catCounts[c.id]=0);
+  empScores.forEach(e=>catCounts[e._cat.id]++);
+
+  // Step 3: Engagement %
+  const engCount = (catCounts.engaged||0)+(catCounts.superEngaged||0);
+  const engPct = d.length ? +(engCount/d.length*100).toFixed(1) : 0;
+
+  // Update ring
+  const circ = 2*Math.PI*58;
+  const arc = document.getElementById('eng-ring-arc');
+  if(arc){
+    const offset = circ*(1-engPct/100);
+    arc.setAttribute('stroke-dasharray',circ.toFixed(1));
+    setTimeout(()=>arc.style.strokeDashoffset=offset.toFixed(1),50);
+    const ringColor = engPct>=60?'#22c55e':engPct>=40?'#eab308':'#ef4444';
+    arc.setAttribute('stroke',ringColor);
+    document.getElementById('eng-ring-arc').setAttribute('stroke',ringColor);
+  }
+  document.getElementById('eng-pct-num').textContent=engPct+'%';
+  document.getElementById('eng-pct-num').style.color=engPct>=60?'var(--green)':engPct>=40?'var(--accent)':'var(--red)';
+
+  // Category chips
+  document.getElementById('eng-cat-chips').innerHTML=ENG_CATS.map(c=>`
+    <div class="eng-cat-chip" style="background:${c.light};color:${c.color}">
+      <div class="eng-cat-dot" style="background:${c.color}"></div>
+      ${c.label}: <strong>${catCounts[c.id]}</strong>
+    </div>`).join('');
+
+  // Step 4: Distribution bar
+  const total = d.length||1;
+  document.getElementById('eng-dist-bar').innerHTML=ENG_CATS.map(c=>{
+    const w=(catCounts[c.id]/total*100).toFixed(1);
+    return`<div class="dist-seg" style="width:${w}%;background:${c.color}" data-tip="${c.label}: ${catCounts[c.id]} (${w}%)">${w>8?catCounts[c.id]:''}</div>`;
+  }).join('');
+  document.getElementById('eng-dist-legend').innerHTML=ENG_CATS.map(c=>`
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${c.color};display:inline-block"></span>${c.label}: ${catCounts[c.id]}</span>`).join('');
+
+  // Metrics
+  const notEngCount=(catCounts.superDisengaged||0)+(catCounts.disengaged||0)+(catCounts.neutral||0);
+  const avgEng=avg(empScores.map(e=>e._score));
+  document.getElementById('eng-metrics').innerHTML=`
+    <div class="metric">
+      <div class="metric-val" style="color:${engPct>=60?'var(--green)':engPct>=40?'var(--accent)':'var(--red)'}">${engPct}%</div>
+      <div class="metric-label">Engagement %</div>
+      <div class="metric-sub">Engaged + Super Engaged</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:${engPct}%;background:${engPct>=60?'var(--green)':'var(--accent)'}"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--accent)">${avgEng.toFixed(2)}</div>
+      <div class="metric-label">Avg Eng. Score</div>
+      <div class="metric-sub">Out of 5.00</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--red)">${notEngCount}</div>
+      <div class="metric-label">Not Engaged</div>
+      <div class="metric-sub">Requires attention</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--green)">${engCount}</div>
+      <div class="metric-label">Engaged Employees</div>
+      <div class="metric-sub">Engaged + Super Engaged</div>
+    </div>`;
+
+  // Step 4: Distribution bar chart
+  mkChart('eng-dist-chart',{
+    type:'bar',
+    data:{
+      labels:ENG_CATS.map(c=>c.label),
+      datasets:[{
+        data:ENG_CATS.map(c=>catCounts[c.id]),
+        backgroundColor:ENG_CATS.map(c=>c.color+'cc'),
+        borderColor:ENG_CATS.map(c=>c.color),
+        borderWidth:1,borderRadius:8,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} employees (${(ctx.raw/total*100).toFixed(1)}%)`}}},
+      scales:{y:{beginAtZero:true,grid:{color:'var(--surface3)'},ticks:{color:'var(--text2)',font:{size:11}}},
+              x:{grid:{display:false},ticks:{color:'var(--text2)',font:{size:10}}}}}
+  });
+
+  // Step 5: Dimension scores (overall)
+  const dimScores = DIMENSIONS.map(dim=>({...dim, avgScore:dimScore(d,dim), pct:dimPct(dimScore(d,dim))}));
+  const maxPct = Math.max(...dimScores.map(x=>x.pct),1);
+  document.getElementById('eng-dim-bars').innerHTML=dimScores.map(dim=>{
+    const col=dim.pct>=65?'var(--green)':dim.pct>=50?'var(--accent)':'var(--red)';
+    return`<div class="dim-bar-row">
+      <div class="dim-icon">${dim.emoji}</div>
+      <div class="dim-name">${dim.label}</div>
+      <div class="dim-track"><div class="dim-fill" style="width:${dim.pct}%;background:${col}"></div></div>
+      <div class="dim-pct" style="color:${col}">${dim.pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Step 7: Not Engaged group
+  const notEngGroup = empScores.filter(e=>['superDisengaged','disengaged','neutral'].includes(e._cat.id));
+  document.getElementById('not-eng-count').textContent=notEngGroup.length;
+
+  // Step 8–9: Dim scores for not engaged
+  const notEngDimScores = DIMENSIONS.map(dim=>({...dim, avgScore:dimScore(notEngGroup,dim), pct:dimPct(dimScore(notEngGroup,dim))}));
+  const bottom3 = [...notEngDimScores].sort((a,b)=>a.pct-b.pct).slice(0,3).map(x=>x.id);
+
+  document.getElementById('noteng-dim-bars').innerHTML=notEngDimScores.map(dim=>{
+    const isBottom=bottom3.includes(dim.id);
+    const col=isBottom?'var(--red)':dim.pct>=50?'var(--accent)':'var(--orange)';
+    return`<div class="dim-bar-row" style="${isBottom?'background:var(--red-dim);border-radius:var(--r-xs);padding:6px 8px;':''}">
+      <div class="dim-icon">${dim.emoji}</div>
+      <div class="dim-name">${dim.label}</div>
+      <div class="dim-track"><div class="dim-fill" style="width:${dim.pct}%;background:${col}"></div></div>
+      <div class="dim-pct" style="color:${col}">${dim.pct}%</div>
+      ${isBottom?'<div class="dim-flag" style="background:var(--red-dim);color:var(--red)">⚠️ Low</div>':''}
+    </div>`;
+  }).join('');
+
+  // Step 10–11: Gap chart
+  const gapData = DIMENSIONS.map(dim=>{
+    const overall=dimPct(dimScore(d,dim));
+    const notEng=notEngGroup.length?dimPct(dimScore(notEngGroup,dim)):0;
+    return{...dim,overall,notEng,gap:+(overall-notEng).toFixed(1)};
+  });
+
+  mkChart('gap-chart',{
+    type:'bar',
+    data:{
+      labels:gapData.map(d=>`${d.emoji} ${d.label}`),
+      datasets:[
+        {label:'Overall',data:gapData.map(x=>x.overall),backgroundColor:'#3b82f6aa',borderColor:'#3b82f6',borderWidth:1,borderRadius:4},
+        {label:'Not Engaged',data:gapData.map(x=>x.notEng),backgroundColor:gapData.map(x=>bottom3.includes(x.id)?'#ef4444cc':'#f97316aa'),borderColor:gapData.map(x=>bottom3.includes(x.id)?'#ef4444':'#f97316'),borderWidth:1,borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{color:'var(--text2)',font:{size:11},padding:12}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}%`}}},
+      scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',color:'var(--text2)',font:{size:10}},grid:{color:'var(--surface3)'}},
+              x:{grid:{display:false},ticks:{color:'var(--text2)',font:{size:10},maxRotation:30}}}}
+  });
+
+  // Gap table
+  document.getElementById('gap-table-body').innerHTML=gapData.map(x=>{
+    const isBot=bottom3.includes(x.id);
+    const gapCol=x.gap>20?'var(--red)':x.gap>10?'var(--orange)':'var(--text2)';
+    return`<tr style="${isBot?'background:var(--red-dim);':''}">
+      <td style="font-weight:600;color:var(--text)">${x.emoji} ${x.label} ${isBot?'<span style="font-size:10px;color:var(--red)">⚠️ Bottom 3</span>':''}</td>
+      <td style="text-align:center;color:var(--green);font-weight:700">${x.overall}%</td>
+      <td style="text-align:center;color:${isBot?'var(--red)':'var(--orange)'};font-weight:700">${x.notEng}%</td>
+      <td style="text-align:center"><span style="background:${x.gap>20?'var(--red-dim)':x.gap>10?'#f9731622':'var(--surface3)'};color:${gapCol};padding:2px 8px;border-radius:10px;font-weight:700">−${x.gap}%</span></td>
+      <td><span class="cat-pill" style="background:${isBot?'var(--red-dim)':'var(--surface3)'};color:${isBot?'var(--red)':'var(--text2)'}">${isBot?'🔴 Key Driver':'–'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Step 12: Auto-generated insights
+  const bottom3Dims = [...gapData].sort((a,b)=>a.notEng-b.notEng).slice(0,3);
+  const insightTexts = {
+    leadership:  (g)=>`Leadership scores among disengaged employees are ${g}% lower — lack of motivation from superiors and perceived unfairness are likely contributing to disengagement.`,
+    communication:(g)=>`Communication gaps of ${g}% in the not-engaged group suggest that feedback channels and information flow are major pain points driving dissatisfaction.`,
+    compensation:(g)=>`Compensation scores drop ${g}% among disengaged employees — perceived inequity in pay and incentives is a significant dissatisfaction driver.`,
+    training:    (g)=>`Training scores are ${g}% lower among disengaged employees — limited development opportunities and skill-building gaps are fuelling disengagement.`,
+    reward:      (g)=>`Reward & Recognition is ${g}% lower among disengaged employees — employees feel their good work goes unnoticed or is not fairly rewarded.`,
+    improvement: (g)=>`Improvement Orientation gap of ${g}% indicates disengaged employees feel suggestions are not welcomed or implemented, reducing their sense of ownership.`,
+    grievance:   (g)=>`Grievance Redressal is ${g}% lower in the not-engaged group — unaddressed concerns are likely amplifying frustration and disengagement.`,
+    social:      (g)=>`Social Environment scores drop ${g}% among disengaged employees — poor work-life integration and inadequate external facilities are affecting morale.`,
+  };
+  const dimColors=['#ef4444','#f97316','#eab308'];
+  document.getElementById('eng-insights').innerHTML=bottom3Dims.map((dim,i)=>`
+    <div class="insight-card">
+      <div class="insight-num" style="background:${dimColors[i]}">${i+1}</div>
+      <div class="insight-body">
+        <div class="insight-title">${dim.emoji} ${dim.label}</div>
+        <div class="insight-text">${(insightTexts[dim.id]||((g)=>`${dim.label} is ${g}% lower among disengaged employees — a key driver of dissatisfaction.`))(dim.gap)}</div>
+        <span class="insight-gap" style="background:var(--red-dim);color:var(--red)">Gap: −${dim.gap}% vs overall</span>
+        <span class="insight-gap" style="background:var(--surface3);color:var(--text2);margin-left:6px">Overall: ${dim.overall}% · Not Engaged: ${dim.notEng}%</span>
+      </div>
+    </div>`).join('');
+
+  // Step 13: High-risk groups
+  function disengagePct(group){
+    if(!group.length)return 0;
+    const notEng=group.filter(e=>['superDisengaged','disengaged','neutral'].includes(e._cat.id));
+    return+(notEng.length/group.length*100).toFixed(1);
+  }
+  // By division
+  const divRisk=DIVS.map(dv=>({label:dv,pct:disengagePct(empScores.filter(e=>e.div===dv))})).sort((a,b)=>b.pct-a.pct);
+  // By level
+  const LEVELS2=['IC','MIC','MM1','MM2','TL'];
+  const levelRisk=LEVELS2.map(lv=>({label:lv,pct:disengagePct(empScores.filter(e=>e.level===lv))})).sort((a,b)=>b.pct-a.pct);
+  // By tenure
+  const TENURES2=['0-1','1-3','3-5','5-8','8-12','12-20','20+'];
+  const tenureRisk=TENURES2.map(t=>({label:t+' yrs',pct:disengagePct(empScores.filter(e=>e.tenure===t))})).sort((a,b)=>b.pct-a.pct);
+
+  const topDiv=divRisk[0], topLevel=levelRisk[0], topTenure=tenureRisk[0];
+  document.getElementById('risk-groups').innerHTML=`
+    <div style="margin-bottom:14px;padding:10px 14px;background:var(--red-dim);border-radius:var(--r-xs);font-size:12px;color:#fca5a5;border:1px solid #ef444433">
+      <strong>⚠️ Highest disengagement observed in:</strong><br>
+      Division: <strong>${topDiv?.label}</strong> (${topDiv?.pct}%) · Level: <strong>${topLevel?.label}</strong> (${topLevel?.pct}%) · Tenure: <strong>${topTenure?.label}</strong> (${topTenure?.pct}%)
+    </div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px">By Division</div>
+    ${divRisk.map(r=>`<div class="risk-row">
+      <div class="risk-label">${r.label}</div>
+      <div style="flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden">
+        <div style="width:${r.pct}%;height:100%;background:${r.pct>60?'var(--red)':r.pct>40?'var(--orange)':'var(--accent)'};border-radius:3px"></div>
+      </div>
+      <div class="risk-pct" style="background:${r.pct>60?'var(--red-dim)':r.pct>40?'var(--orange-dim)':'var(--surface3)'};color:${r.pct>60?'var(--red)':r.pct>40?'var(--orange)':'var(--text2)'}">${r.pct}%</div>
+    </div>`).join('')}
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin:12px 0 8px">By Responsibility Level</div>
+    ${levelRisk.map(r=>`<div class="risk-row">
+      <div class="risk-label">${r.label}</div>
+      <div style="flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden">
+        <div style="width:${r.pct}%;height:100%;background:${r.pct>60?'var(--red)':'var(--purple)'};border-radius:3px"></div>
+      </div>
+      <div class="risk-pct" style="background:var(--purple-dim);color:var(--purple)">${r.pct}%</div>
+    </div>`).join('')}`;
+
+  // Risk chart — disengagement by tenure
+  mkChart('risk-chart',{
+    type:'bar',
+    data:{
+      labels:tenureRisk.map(r=>r.label),
+      datasets:[{
+        label:'Not Engaged %',
+        data:tenureRisk.map(r=>r.pct),
+        backgroundColor:tenureRisk.map(r=>r.pct>60?'#ef4444cc':r.pct>40?'#f97316cc':'#eab308cc'),
+        borderColor:tenureRisk.map(r=>r.pct>60?'#ef4444':r.pct>40?'#f97316':'#eab308'),
+        borderWidth:1,borderRadius:7,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Not Engaged: ${ctx.raw}%`}}},
+      scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',color:'var(--text2)',font:{size:10}},grid:{color:'var(--surface3)'}},
+              x:{grid:{display:false},ticks:{color:'var(--text2)',font:{size:10}}}}}
+  });
+
+  // Employee table
+  document.getElementById('eng-emp-table').innerHTML=empScores.slice(0,150).map(e=>{
+    const c=e._cat;
+    return`<tr>
+      <td style="color:var(--text3)">${e.id}</td>
+      <td>${e.div}</td><td>${e.level}</td><td>${e.gender}</td><td>${e.tenure}</td>
+      <td style="text-align:center;font-weight:700;color:${c.color}">${e._score.toFixed(2)}</td>
+      <td style="text-align:center"><span class="cat-pill" style="background:${c.light};color:${c.color}">${c.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// PAGE NAV — updated to include engagement
+// ════════════════════════════════════════════════════════
+let activePage='sections';
+function showPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{
+    document.querySelectorAll('.nav-btn').forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+name+"'"))b.classList.add('active');
+    });
+  }
+  activePage=name;
+  renderActive();
+}
+function renderActive(){
+  if(activePage==='sections')renderSections();
+  else if(activePage==='engagement')renderEngagement();
+  else if(activePage==='overview')renderOverview();
+  else if(activePage==='compare')renderCompare();
+  else if(activePage==='heatmap')renderHeatmap();
+  else if(activePage==='problems')renderProblems();
+  else if(activePage==='individual')renderIndividual();
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+initIndividualSelect();
+renderSections();
+</script>
+</body>
+</html>
